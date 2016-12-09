@@ -2,24 +2,6 @@ const {app, BrowserWindow, Menu} = require('electron')
 const path = require('path')
 const url = require('url')
 
-const template = [
-    {
-        label: 'File',
-        submenu: [
-            {
-                label: 'Load CSV file',
-                accelerator: 'CmdOrCtrl+O',
-                click: () => {
-                    win.webContents.send('open-file')
-                }
-            },
-            {
-                role: 'quit'
-            }
-        ]
-    }
-]
-
 let win
 
 function createWindow() {
@@ -29,8 +11,7 @@ function createWindow() {
         height: 600,
     });
 
-    const menu = Menu.buildFromTemplate(template)
-    Menu.setApplicationMenu(menu)
+    Menu.setApplicationMenu(null)
 
 
     // and load the index.html of the app.

@@ -1,5 +1,7 @@
-const {remote, ipcRenderer} = require('electron')
+const {remote} = require('electron')
 const csv = require('fast-csv')
+const swappy = require('swappy-client')
+const url = require('url')
 
 const app = new Vue({
     el: '#app',
@@ -48,10 +50,34 @@ const app = new Vue({
                         this.pushLine(data);
                     })
             }
+        },
+        authenticate(callback) {
+            let authUrl = "https://api.swappy.com/oauth2/authorize?response_type=token&redirect_uri=https%3A%2F%2Fapi.swappy.com%2Foauth2%2Flogin_success&realm=Service&client_id=swapster&scope=addresses+sell+email&state=",
+                state = Math.random();
+
+            let win = new remote.BrowserWindow({
+                parent: remote.getCurrentWindow(),
+                modal: true,
+                width: 600,
+                height: 600
+            })
+
+            win.loadURL(authUrl + state)
+            win.webContents.on('did-get-response-details', (event, status, newURL) => {
+                if (String(newURL).match(/^https:\/\/api\.swappy\.com\/oauth2\/login_success/)) {
+                    let parts = url.parse('?' + url.parse(newURL).hash.substr(1), true)
+                    win.close()
+                    if (parts.query.access_token) {
+                        this.access_token = parts.query.access_token
+                        if (callback) {
+                            callback(this.access_token);
+                        }
+                    } else {
+                        alert('Error getting access token')
+                    }
+                }
+            });
+
         }
     }
-})
-
-ipcRenderer.on('open-file', () => {
-    app.openDialog();
 })
