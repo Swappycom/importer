@@ -1,0 +1,19 @@
+{
+  "name": "swappy-importer",
+  "version": "0.1.0",
+  "main": "main.js",
+  "description": "Swappy.com API clients, allows you to import products via CSV",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "Swappy.com",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^1.4.1"
+  },
+  "dependencies": {
+    "fast-csv": "^2.3.0",
+    "jquery": "^3.1.1",
+    "vue": "^2.1.4"
+  }
+}

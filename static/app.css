@@ -1,0 +1,34 @@
+.btn-xlarge {
+    padding: 12px 24px;
+}
+
+.no-content {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+td {
+    max-width: 300px;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+}
+
+.btn.btn-default[disabled] {
+    opacity: .8;
+    pointer-events: none;
+}
+
+.toolbar-actions {
+    display: flex;
+    justify-content: space-between;
+}
+.toolbar-actions .title {
+    display: inline-block;
+    vertical-align: middle;
+    line-height: 22px;
+}
+.toolbar-actions:after, .toolbar-actions:before, .toolbar:after, .toolbar:before {
+    display: none;
+}

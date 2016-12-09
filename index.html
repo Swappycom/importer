@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Swappy Importer</title>
+</head>
+<body>
+<div id="app" class="window">
+    <header class="toolbar toolbar-header">
+        <div class="toolbar-actions">
+            <button class="btn btn-default align-left" @click="openDialog">
+                <span class="icon icon-folder"></span>
+            </button>
+            <h1 class="title">Swappy Importer</h1>
+            <button class="btn btn-default align-right" disabled>
+                <span class="icon icon-upload"></span>
+            </button>
+        </div>
+    </header>
+    <div class="window-content">
+        <div class="no-content" v-if="lines.length == 0">
+            <button @click="openDialog" class="btn btn-xlarge btn-default">Choisir un fichier</button>
+        </div>
+        <table class="table-striped" v-if="lines.length > 0">
+            <thead>
+            <tr>
+                <th style="width: 1%">#</th>
+                <th v-for="header in headers">{{ header }}</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-for="line, index in lines">
+                <td>{{ index + 1 }}</td>
+                <td v-for="header in headers">
+                    {{ line[header] }}
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<link rel="stylesheet" href="static/photon-dist/css/photon.min.css">
+<link rel="stylesheet" href="static/app.css">
+<script src="node_modules/vue/dist/vue.js"></script>
+<script src="static/app.js"></script>
+</body>
+</html>
