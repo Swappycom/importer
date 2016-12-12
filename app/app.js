@@ -51,15 +51,50 @@ const app = new Vue({
                     })
             }
         },
+        sendLines() {
+            this.getClient((SwappyClient) => {
+                console.log('Api loaded', SwappyClient);
+                let oauthApi = new SwappyClient.OauthApi();
+                oauthApi.getMe({}, (err, res, data) => {
+                    if (err) {
+                        return console.error(err);
+                    }
+                    console.log('Connected as', res.first_name, res.last_name);
+
+                });
+            });
+        },
+        getClient(callback) {
+            this.authenticate((err, token) => {
+                if(err) {
+                    return console.error(err);
+                }
+                let SwappyClient = require('swappy-client'),
+                    defaultClient = SwappyClient.ApiClient.instance;
+                defaultClient.authentications.oauth.accessToken = token;
+
+                callback(SwappyClient);
+            });
+        },
         authenticate(callback) {
+            if (this.access_token) {
+                callback(null, this.access_token);
+            }
             let authUrl = "https://api.swappy.com/oauth2/authorize?response_type=token&redirect_uri=https%3A%2F%2Fapi.swappy.com%2Foauth2%2Flogin_success&realm=Service&client_id=swapster&scope=addresses+sell+email&state=",
-                state = Math.random();
+                state = Math.random()
 
             let win = new remote.BrowserWindow({
+                resizable: false,
                 parent: remote.getCurrentWindow(),
                 modal: true,
-                width: 600,
-                height: 600
+                width: 520,
+                height: 420,
+                webPreferences: {
+                    nodeIntegration: false
+                }
+            })
+            win.webContents.openDevTools({
+                mode: 'detach'
             })
 
             win.loadURL(authUrl + state)
@@ -69,11 +104,9 @@ const app = new Vue({
                     win.close()
                     if (parts.query.access_token) {
                         this.access_token = parts.query.access_token
-                        if (callback) {
-                            callback(this.access_token);
-                        }
+                        callback(null, this.access_token);
                     } else {
-                        alert('Error getting access token')
+                        callback('Error getting access token', null)
                     }
                 }
             });
