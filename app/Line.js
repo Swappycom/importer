@@ -5,7 +5,7 @@ class Line {
         }
         for (let head of Line.getHeaders()) {
             this[head] = data[head] || (typeof defaults[head] !== 'undefined' ? defaults[head] : '')
-            if(this.getInputType(head) == 'number') {
+            if (this.getInputType(head) == 'number') {
                 this[head] = this[head].replace(/[^0-9.]/g, '');
             }
         }
@@ -52,7 +52,7 @@ class Line {
     }
 
     getInputType(header) {
-        switch(header) {
+        switch (header) {
             case 'price':
             case 'address':
             case 'reserve_price':
@@ -112,9 +112,16 @@ class Line {
         if (this.payment) {
             json.payment = []
             for (let id of this.payment.split('|')) {
-                json.payment.push({
-                    'id': id
-                })
+                if (id == 4 && this.paypal_email) {
+                    json.payment.push({
+                        'id': id,
+                        'user_data': this.paypal_email
+                    })
+                } else {
+                    json.payment.push({
+                        'id': id
+                    })
+                }
             }
         }
 
@@ -159,7 +166,7 @@ class Line {
         //Offers
         if (this.accept_offers) {
             json.offer = {
-                accept: !!this.accept_offers
+                enabled: !!this.accept_offers
             }
             if (this.accept_offers_over) {
                 json.offer.accept_over = this.accept_offers_over
@@ -229,6 +236,21 @@ class Line {
         }
 
         return 'Done'
+    }
+
+    getErrorText(error) {
+        switch (error.code) {
+            case "unknown_field":
+                return "This field should not have been sent, please fill in a bug report"
+            case "missing_field":
+                return "This field is required"
+            case "not_found":
+                return "Invalid ID"
+            case "already_exists":
+                return "Add seems to be a duplicate"
+            case "invalid":
+                return error.message
+        }
     }
 }
 

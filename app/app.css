@@ -69,11 +69,10 @@ td {
 .popup {
     position: absolute;
     z-index: 1;
-    width: 500px;
+    width: 80%;
     height: 500px;
     background: white;
-    left: 50%;
-    margin-left: -250px;
+    left: 10%;
     box-shadow: 5px 5px 10px rgba(0, 0, 0, .2);
     border-radius: 2px;
 }
@@ -93,9 +92,20 @@ td.has-input textarea {
     max-width: 100%;
     min-width: 100%;
 }
-td.has-input input, td.has-input textarea {
+.table-striped tr:nth-child(even) .has-input input, .table-striped tr:nth-child(even) .has-input textarea {
+    background: #f5f5f4;
+}
+td.has-input input[type="text"], td.has-input input[type="number"], td.has-input textarea {
+    padding-left: 5px;
     width: 100%;
     font-size: 12px;
+    margin-left: 0;
+    border-width: 0;
+}
+td.has-input input[type="checkbox"] {
+    font-size: 12px;
+    width: auto;
+    margin: 2px 0 0 5px;
     vertical-align: middle;
 }
 

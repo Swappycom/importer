@@ -126,7 +126,8 @@ const app = new Vue({
                     if (err) {
                         line.errors.push({
                             field: 'images',
-                            code: err
+                            code: 'invalid',
+                            message: err
                         })
                     }
                     line.images = urls.join('|')

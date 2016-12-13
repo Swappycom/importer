@@ -65,7 +65,7 @@
                     <tbody>
                     <tr v-for="error in showLine.line.errors" class="error">
                         <th>{{ error.field }}</th>
-                        <td>{{ error.code }}</td>
+                        <td>{{ showLine.line.getErrorText(error) }}</td>
                     </tr>
                     <tr v-for="header in headers">
                         <th>{{ header }}</th>
