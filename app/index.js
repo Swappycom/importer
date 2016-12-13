@@ -126,7 +126,7 @@ const app = new Vue({
                     if (err) {
                         line.errors.push({
                             field: 'images',
-                            message: err
+                            code: err
                         })
                     }
                     line.images = urls.join('|')
@@ -172,6 +172,7 @@ const app = new Vue({
                     if (err) {
                         if (err.status == 422 && err.response.body.message == "Validation Failed") {
                             line.errors = err.response.body.errors
+                            console.log('errors', err.response.body.errors);
                             return callback()
                         }
                         return console.error(err)

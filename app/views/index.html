@@ -63,6 +63,10 @@
             <div class="window-content">
                 <table class="table-striped table-no-select">
                     <tbody>
+                    <tr v-for="error in showLine.line.errors" class="error">
+                        <th>{{ error.field }}</th>
+                        <td>{{ error.code }}</td>
+                    </tr>
                     <tr v-for="header in headers">
                         <th>{{ header }}</th>
                         <td class="has-input">

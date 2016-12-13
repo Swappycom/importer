@@ -39,6 +39,7 @@ class Line {
             'accept_offers_over',
             'refuse_offers_under',
             'delivery',
+            'address',
             'payment',
             'paypal_email',
             'charge_taxes',
@@ -53,6 +54,7 @@ class Line {
     getInputType(header) {
         switch(header) {
             case 'price':
+            case 'address':
             case 'reserve_price':
             case 'accept_offers_over':
             case 'refuse_offers_under':
