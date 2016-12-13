@@ -93,7 +93,9 @@ const app = new Vue({
                     console.log('Connected as', res.first_name, res.last_name)
 
                     this.uploadImages(lines, () => {
-                        console.log('done')
+                        this.doSendLines(lines, () => {
+
+                        });
                     })
                 })
             })
@@ -145,6 +147,23 @@ const app = new Vue({
                     }
                 })
             });
+            this.selectLine({}, index, line);
+
+        },
+        doSendLines: function (lines, callback, index = 0) {
+            if (index >= lines.length) {
+                return callback();
+            }
+            let nextCallback = () => {
+                    this.uploadImages(lines, callback, index + 1);
+                },
+                line = lines[index];
+            if (!line.areImagesReady()) {
+                nextCallback();
+            }
+
+            console.log(line.getJson());
+            nextCallback();
         },
         getClient(callback) {
             this.authenticate((err, token) => {
@@ -213,9 +232,18 @@ const app = new Vue({
     }
 })
 
+let previousJson = '';
 app.$watch('lines', () => {
-    console.log('File modified');
-    ipcRenderer.send('fileModified', true)
+    let json = [];
+    for (let line of app.lines) {
+        json.push(line.getJson());
+    }
+    json = JSON.stringify(json);
+    if (json != previousJson) {
+        console.log('File Modified')
+        ipcRenderer.send('fileModified', true)
+        previousJson = json;
+    }
 }, {deep: true});
 
 ipcRenderer.on('saveFile', () => {

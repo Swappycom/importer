@@ -6,7 +6,7 @@ class Line {
         for (let head of Line.getHeaders()) {
             this[head] = data[head] || (typeof defaults[head] !== 'undefined' ? defaults[head] : '')
         }
-        this.selected = false;
+        this.selected = false
     }
 
     static cleanPrice(price) {
@@ -21,6 +21,7 @@ class Line {
 
     static getHeaders() {
         return [
+            'id',
             'category',
             'title',
             'description',
@@ -46,16 +47,17 @@ class Line {
     }
 
     areImagesReady() {
-        let images = this.getJson().images;
-        if(!images) {
-            return true;
+        let images = this.getJson().images
+        if (!images) {
+            return true
         }
-        for(let image of images) {
-            if(!image.match(/^https?:\/\//)) {
-                return false;
+        for (let image of images) {
+            if (!image.match(/^https?:\/\//)) {
+                console.log('Image', image, 'not ready!')
+                return false
             }
         }
-        return true;
+        return true
     }
 
     getJson() {
@@ -69,36 +71,36 @@ class Line {
         if (this.category) {
             let category = this.category.split('/')
             category = category[category.length - 1]
-            category = category.replace(/[^0-9]+/g, '');
-            category = Number.parseInt(category);
+            category = category.replace(/[^0-9]+/g, '')
+            category = Number.parseInt(category)
             if (!Number.isNaN(category)) {
                 json.category = {
                     id: this.category
                 }
             } else {
-                console.error('Invalid Category ID', this.category);
+                console.error('Invalid Category ID', this.category)
             }
         }
 
         //Payment
         if (this.payment) {
-            json.payment = [];
+            json.payment = []
             for (let id of this.payment.split('|')) {
                 json.payment.push({
                     'id': id
-                });
+                })
             }
         }
 
         //Deliveries
         if (this.delivery) {
-            json.delivery = [];
+            json.delivery = []
             for (let info of this.delivery.split('|')) {
-                let parts = info.split(':');
+                let parts = info.split(':')
                 json.delivery.push({
                     'id': parts[0],
                     'cost': parts[1]
-                });
+                })
             }
         }
 
@@ -116,15 +118,15 @@ class Line {
             }
         }
         if (this.estimate_max) {
-            json.estimate = json.estimate || {};
-            json.estimate.max = this.estimate_max;
+            json.estimate = json.estimate || {}
+            json.estimate.max = this.estimate_max
         }
 
         //Options
         for (let header of Line.getHeaders()) {
             if (header.substr(0, 7) == 'option_' && this[header]) {
-                json.options = json.options || {};
-                json.options[header.substr(7)] = this[header];
+                json.options = json.options || {}
+                json.options[header.substr(7)] = this[header]
             }
         }
 
@@ -153,7 +155,32 @@ class Line {
 
         //Images
         if (this.images) {
-            json.images = this.images.split('|');
+            json.images = this.images.split('|')
+        }
+
+        let ignoreHeaders = [
+            'images',
+            'price',
+            'reserve_price',
+            'category',
+            'payment',
+            'delivery',
+            'address',
+            'estimate_min',
+            'option_titlecolor',
+            'option_first',
+            'option_frame',
+            'accept_offers',
+            'accept_offers_over',
+            'refuse_offers_under',
+            'charge_taxes',
+            'charge_taxes_shipping',
+        ]
+
+        for (let header of Line.getHeaders()) {
+            if (this[header] && ignoreHeaders.indexOf(header) === -1) {
+                json[header] = this[header]
+            }
         }
 
         return json
@@ -165,6 +192,17 @@ class Line {
             ready: this.areImagesReady()
         }
     }
+
+    getStatusText() {
+        if (!this.areImagesReady()) {
+            return 'New (local images)'
+        }
+        if (!this.id) {
+            return 'New (images ready)'
+        }
+
+        return 'Done'
+    }
 }
 
-module.exports = Line;
+module.exports = Line

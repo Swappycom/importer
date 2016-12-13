@@ -25,14 +25,14 @@
             <thead>
             <tr>
                 <th style="width: 1%">#</th>
-                <th style="width: 1%">Img?</th>
+                <th style="width: 1%">Status</th>
                 <th v-for="header in headers">{{ header }}</th>
             </tr>
             </thead>
             <tbody>
             <tr v-for="line, index in lines" @mousedown="selectLine($event, index, line)" v-bind:class="{ selected: line.selected }">
                 <td>{{ index + 1 }}</td>
-                <td>{{ line.areImagesReady() ? 'Ready' : 'Need Upload' }}</td>
+                <td>{{ line.getStatusText() }}</td>
                 <td v-for="header in headers">
                     {{ line[header] }}
                 </td>
