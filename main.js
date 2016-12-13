@@ -19,6 +19,7 @@ function createWindow() {
     Menu.setApplicationMenu(null)
 
 
+
     // and load the index.html of the app.
     win.loadURL(url.format({
         pathname: path.join(__dirname, 'index.html'),
@@ -29,6 +30,13 @@ function createWindow() {
     // Open the DevTools.
     win.webContents.openDevTools({
         mode: 'detach'
+    })
+
+    win.webContents.once('dom-ready', function () {
+        console.log('Ready to show')
+        if (process.argv.length > 2) {
+            win.webContents.send('openFile', process.argv[2])
+        }
     })
 
     win.on('close', function (e) {

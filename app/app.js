@@ -93,7 +93,7 @@ const app = new Vue({
                     console.log('Connected as', res.first_name, res.last_name)
 
                     this.uploadImages(lines, () => {
-                        this.doSendLines(lines, () => {
+                        this.sendReadyLines(lines, () => {
 
                         });
                     })
@@ -147,34 +147,48 @@ const app = new Vue({
                     }
                 })
             });
-            this.selectLine({}, index, line);
-
         },
-        doSendLines: function (lines, callback, index = 0) {
+        sendReadyLines: function (lines, callback, index = 0) {
             if (index >= lines.length) {
                 return callback();
             }
             let nextCallback = () => {
-                    this.uploadImages(lines, callback, index + 1);
+                    this.sendReadyLines(lines, callback, index + 1);
                 },
                 line = lines[index];
             if (!line.areImagesReady()) {
                 nextCallback();
             }
+            this.doSendLine(line, nextCallback);
+        },
+        doSendLine(line, callback) {
+            this.getClient((SwappyClient) => {
+                let productsApi = new SwappyClient.ProductsApi(),
+                    product = new swappy.Product.constructFromObject(line.getJson());
 
-            console.log(line.getJson());
-            nextCallback();
+                productsApi.createProduct(product, {}, (err, data, response) => {
+                    if(err) {
+                        if(err.status == 422 && err.response.body.message == "Validation Failed") {
+                            line.errors = err.response.body.errors
+                            return callback()
+                        }
+                        return console.error(err)
+                    }
+                    line.selected = false
+                    line.id = data.id
+                    callback()
+                });
+            });
         },
         getClient(callback) {
             this.authenticate((err, token) => {
                 if (err) {
                     return console.error(err)
                 }
-                let SwappyClient = require('swappy-client'),
-                    defaultClient = SwappyClient.ApiClient.instance
-                defaultClient.authentications.oauth.accessToken = token
 
-                callback(SwappyClient)
+                swappy.ApiClient.instance.authentications.oauth.accessToken = token
+
+                callback(swappy)
             })
         },
         authenticate(callback) {
@@ -244,8 +258,12 @@ app.$watch('lines', () => {
         ipcRenderer.send('fileModified', true)
         previousJson = json;
     }
-}, {deep: true});
+}, {deep: true})
 
 ipcRenderer.on('saveFile', () => {
     app.saveFile()
+})
+
+ipcRenderer.on('openFile', (ev, file) => {
+    app.openFile(file)
 })

@@ -7,6 +7,7 @@ class Line {
             this[head] = data[head] || (typeof defaults[head] !== 'undefined' ? defaults[head] : '')
         }
         this.selected = false
+        this.errors = [];
     }
 
     static cleanPrice(price) {
@@ -69,13 +70,11 @@ class Line {
 
         //Category
         if (this.category) {
-            let category = this.category.split('/')
-            category = category[category.length - 1]
-            category = category.replace(/[^0-9]+/g, '')
-            category = Number.parseInt(category)
+            let parts = /^.*\/(\d+)-[^/]+$/.exec(this.category);
+            let category = Number.parseInt(parts[1])
             if (!Number.isNaN(category)) {
                 json.category = {
-                    id: this.category
+                    id: category
                 }
             } else {
                 console.error('Invalid Category ID', this.category)
@@ -98,7 +97,7 @@ class Line {
             for (let info of this.delivery.split('|')) {
                 let parts = info.split(':')
                 json.delivery.push({
-                    'id': parts[0],
+                    'id': Number.parseInt(parts[0]),
                     'cost': parts[1]
                 })
             }
@@ -107,7 +106,7 @@ class Line {
         //Address
         if (this.address) {
             json.address = {
-                id: this.address
+                id: Number.parseInt(this.address)
             }
         }
 
@@ -189,7 +188,8 @@ class Line {
     getCssClasses() {
         return {
             selected: this.selected,
-            ready: this.areImagesReady()
+            ready: this.areImagesReady(),
+            error: this.errors.length > 0
         }
     }
 

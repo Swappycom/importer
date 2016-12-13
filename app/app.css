@@ -40,3 +40,6 @@ td {
     color: #fff;
     background-color: #116cd6;
 }
+.table-striped tr.error {
+    color: red;
+}
