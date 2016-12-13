@@ -1,8 +1,13 @@
-const {app, BrowserWindow, Menu} = require('electron')
+const {app, BrowserWindow, Menu, dialog, ipcMain} = require('electron')
 const path = require('path')
 const url = require('url')
 
-let win
+let win,
+    pendingChanges = false;
+
+ipcMain.on('fileModified', (ev, isModified) => {
+    pendingChanges = isModified
+})
 
 function createWindow() {
     // Create the browser window.
@@ -24,6 +29,31 @@ function createWindow() {
     // Open the DevTools.
     win.webContents.openDevTools({
         mode: 'detach'
+    })
+
+    win.on('close', function (e) {
+        if (pendingChanges) {
+            let choice = dialog.showMessageBox(this,
+                {
+                    type: 'question',
+                    buttons: ['Close without saving', 'Cancel', 'Save and close'],
+                    title: 'Save changes before closing?',
+                    message: 'If you don\'t save the changes, all changes since last save will be lost.'
+                })
+            console.log('Choice', choice)
+            switch (choice) {
+                case 0:
+                    return;
+                case 1:
+                    return e.preventDefault()
+                case 2:
+                    e.preventDefault()
+                    win.webContents.send('saveFile')
+                    ipcMain.on('fileModified', () => {
+                        win.close()
+                    })
+            }
+        }
     })
 
     // Emitted when the window is closed.

@@ -1,4 +1,4 @@
-const {remote} = require('electron')
+const {remote, ipcRenderer} = require('electron')
 const csv = require('fast-csv')
 const swappy = require('swappy-client')
 const url = require('url')
@@ -13,8 +13,15 @@ const app = new Vue({
         headers: Line.getHeaders(),
         lastClickedLine: null,
         access_token: null,
-        baseDir: null,
+        filePath: null,
         lines: []
+    },
+    computed: {
+        selectedLines() {
+            return this.lines.filter((line) => {
+                return line.selected
+            })
+        }
     },
     methods: {
         pushLine(data) {
@@ -31,24 +38,49 @@ const app = new Vue({
                 ]
             })
             if (file) {
-                //Save base dir
-                this.baseDir = path.dirname(file[0])
-
-                //Import CSV file
-                this.lines = []
-                csv
-                    .fromPath(file[0], {
-                        headers: true
-                    })
-                    .on("data", (data) => {
-                        this.pushLine(data)
-                    })
+                this.openFile(file[0]);
             }
+        },
+        openFile(filePath) {
+            //Save base dir
+            this.filePath = filePath
+
+            //Import CSV file
+            this.lines = []
+            csv
+                .fromPath(filePath, {
+                    headers: true
+                })
+                .on("data", (data) => {
+                    this.pushLine(data)
+                })
+                .on("end", () => {
+                    console.log('file', filePath, 'loaded')
+                    ipcRenderer.send('fileModified', false)
+                    this.lines[0].title += '!';
+                });
+        },
+        saveFile() {
+            let csvStream = csv.createWriteStream({headers: true}),
+                writableStream = fs.createWriteStream(this.filePath)
+
+            writableStream.on("finish", function(){
+                ipcRenderer.send('fileModified', false)
+            });
+
+            csvStream.pipe(writableStream)
+            for(let line of this.lines) {
+                csvStream.write(line)
+            }
+            csvStream.end();
+
         },
         sendLines() {
             if (!this.lines.length) {
                 return alert('Please select a CSV file first!')
             }
+            let lines = this.selectedLines || this.lines
+            console.log('Uploading', lines.length, 'lines')
             this.getClient((SwappyClient) => {
                 console.log('Api loaded', SwappyClient)
                 let oauthApi = new SwappyClient.OauthApi()
@@ -58,20 +90,20 @@ const app = new Vue({
                     }
                     console.log('Connected as', res.first_name, res.last_name)
 
-                    this.uploadImages(() => {
-                        console.log('done');
+                    this.uploadImages(lines, () => {
+                        console.log('done')
                     })
                 })
             })
         },
-        uploadImages(callback, index = 0) {
-            if (index >= this.lines.length) {
+        uploadImages(lines, callback, index = 0) {
+            if (index >= lines.length) {
                 return callback();
             }
             let nextCallback = () => {
-                    this.uploadImages(callback, index + 1);
+                    this.uploadImages(lines, callback, index + 1);
                 },
-                line = this.lines[index];
+                line = lines[index];
             if (line.areImagesReady()) {
                 return nextCallback();
             }
@@ -80,13 +112,13 @@ const app = new Vue({
             let images = [];
 
             for (let image of line.getJson().images) {
-                let imagePath = path.join(this.baseDir, image),
+                let imagePath = path.join(path.dirname(this.filePath), image),
                     stats = fs.lstatSync(imagePath);
                 if (stats.isDirectory()) {
-                    let filenames = fs.readdirSync(imagePath);
-                    for (let filename of filenames) {
-                        if (filename.substr(0, 1) !== '.') {
-                            images.push(path.join(imagePath, filename));
+                    let fileNames = fs.readdirSync(imagePath);
+                    for (let fileName of fileNames) {
+                        if (fileName.substr(0, 1) !== '.') {
+                            images.push(path.join(imagePath, fileName));
                         }
                     }
                 } else if (stats.isFile()) {
@@ -127,7 +159,7 @@ const app = new Vue({
         authenticate(callback) {
             if (this.access_token) {
                 return callback(null, this.access_token)
-            }else {
+            } else {
                 console.log('No access token');
             }
             let authUrl = "https://api.swappy.com/oauth2/authorize?response_type=token&redirect_uri=https%3A%2F%2Fapi.swappy.com%2Foauth2%2Flogin_success&realm=Service&client_id=swapster&scope=addresses+sell+email&state=",
@@ -177,4 +209,13 @@ const app = new Vue({
             this.lastClickedLine = index
         }
     }
+})
+
+app.$watch('lines', () => {
+    console.log('File modified');
+    ipcRenderer.send('fileModified', true)
+}, {deep: true});
+
+ipcRenderer.on('saveFile', () => {
+    app.saveFile()
 })
