@@ -57,19 +57,18 @@ const app = new Vue({
                 .on("end", () => {
                     console.log('file', filePath, 'loaded')
                     ipcRenderer.send('fileModified', false)
-                    this.lines[0].title += '!';
                 });
         },
         saveFile() {
             let csvStream = csv.createWriteStream({headers: true}),
                 writableStream = fs.createWriteStream(this.filePath)
 
-            writableStream.on("finish", function(){
+            writableStream.on("finish", function () {
                 ipcRenderer.send('fileModified', false)
             });
 
             csvStream.pipe(writableStream)
-            for(let line of this.lines) {
+            for (let line of this.lines) {
                 csvStream.write(line)
             }
             csvStream.end();
@@ -79,7 +78,10 @@ const app = new Vue({
             if (!this.lines.length) {
                 return alert('Please select a CSV file first!')
             }
-            let lines = this.selectedLines || this.lines
+            let lines = this.selectedLines;
+            if (!lines.length) {
+                lines = this.lines;
+            }
             console.log('Uploading', lines.length, 'lines')
             this.getClient((SwappyClient) => {
                 console.log('Api loaded', SwappyClient)

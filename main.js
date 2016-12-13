@@ -40,7 +40,6 @@ function createWindow() {
                     title: 'Save changes before closing?',
                     message: 'If you don\'t save the changes, all changes since last save will be lost.'
                 })
-            console.log('Choice', choice)
             switch (choice) {
                 case 0:
                     return;
