@@ -32,3 +32,11 @@ td {
 .toolbar-actions:after, .toolbar-actions:before, .toolbar:after, .toolbar:before {
     display: none;
 }
+.table-striped tr:active {
+    background: inherit;
+    color: inherit;
+}
+.table-striped tr.selected {
+    color: #fff;
+    background-color: #116cd6;
+}
