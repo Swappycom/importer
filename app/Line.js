@@ -5,6 +5,9 @@ class Line {
         }
         for (let head of Line.getHeaders()) {
             this[head] = data[head] || (typeof defaults[head] !== 'undefined' ? defaults[head] : '')
+            if(this.getInputType(head) == 'number') {
+                this[head] = this[head].replace(/[^0-9.]/g, '');
+            }
         }
         this.selected = false
         this.errors = [];
@@ -47,6 +50,29 @@ class Line {
         ]
     }
 
+    getInputType(header) {
+        switch(header) {
+            case 'price':
+            case 'reserve_price':
+            case 'accept_offers_over':
+            case 'refuse_offers_under':
+                return 'number';
+            case 'option_titlecolor':
+            case 'option_first':
+            case 'option_frame':
+            case 'auction':
+            case 'auto_renew':
+            case 'accept_offers':
+            case 'charge_taxes':
+            case 'charge_taxes_shipping':
+                return 'checkbox';
+            case 'description':
+                return 'textarea';
+            default:
+                return 'text';
+        }
+    }
+
     areImagesReady() {
         let images = this.getJson().images
         if (!images) {
@@ -54,7 +80,6 @@ class Line {
         }
         for (let image of images) {
             if (!image.match(/^https?:\/\//)) {
-                console.log('Image', image, 'not ready!')
                 return false
             }
         }

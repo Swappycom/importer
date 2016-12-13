@@ -4,7 +4,7 @@ const swappy = require('swappy-client')
 const url = require('url')
 const path = require('path')
 const fs = require('fs')
-const Line = require('./app/Line')
+const Line = require('../Line')
 
 
 const app = new Vue({
@@ -13,8 +13,13 @@ const app = new Vue({
         headers: Line.getHeaders(),
         lastClickedLine: null,
         access_token: null,
+        login: null,
         filePath: null,
-        lines: []
+        lines: [],
+        showLine: {
+            index: null,
+            line: null
+        }
     },
     computed: {
         selectedLines() {
@@ -38,7 +43,7 @@ const app = new Vue({
                 ]
             })
             if (file) {
-                this.openFile(file[0]);
+                this.openFile(file[0])
             }
         },
         openFile(filePath) {
@@ -57,7 +62,7 @@ const app = new Vue({
                 .on("end", () => {
                     console.log('file', filePath, 'loaded')
                     ipcRenderer.send('fileModified', false)
-                });
+                })
         },
         saveFile() {
             let csvStream = csv.createWriteStream({headers: true}),
@@ -65,110 +70,107 @@ const app = new Vue({
 
             writableStream.on("finish", function () {
                 ipcRenderer.send('fileModified', false)
-            });
+            })
 
             csvStream.pipe(writableStream)
             for (let line of this.lines) {
                 csvStream.write(line)
             }
-            csvStream.end();
+            csvStream.end()
 
         },
         sendLines() {
             if (!this.lines.length) {
                 return alert('Please select a CSV file first!')
             }
-            let lines = this.selectedLines;
+            let lines = this.selectedLines
             if (!lines.length) {
-                lines = this.lines;
+                lines = this.lines
             }
             console.log('Uploading', lines.length, 'lines')
-            this.getClient((SwappyClient) => {
-                console.log('Api loaded', SwappyClient)
-                let oauthApi = new SwappyClient.OauthApi()
-                oauthApi.getMe({}, (err, res, data) => {
-                    if (err) {
-                        return console.error(err)
-                    }
-                    console.log('Connected as', res.first_name, res.last_name)
+            this.uploadImages(lines, () => {
+                this.sendReadyLines(lines, () => {
 
-                    this.uploadImages(lines, () => {
-                        this.sendReadyLines(lines, () => {
-
-                        });
-                    })
                 })
             })
         },
         uploadImages(lines, callback, index = 0) {
             if (index >= lines.length) {
-                return callback();
+                return callback()
             }
             let nextCallback = () => {
-                    this.uploadImages(lines, callback, index + 1);
+                    this.uploadImages(lines, callback, index + 1)
                 },
-                line = lines[index];
+                line = lines[index]
             if (line.areImagesReady()) {
-                return nextCallback();
+                return nextCallback()
             }
-            this.selectLine({}, index, line);
+            this.selectLine({}, index, line)
 
-            let images = [];
+            let images = []
 
             for (let image of line.getJson().images) {
                 let imagePath = path.join(path.dirname(this.filePath), image),
-                    stats = fs.lstatSync(imagePath);
+                    stats = fs.lstatSync(imagePath)
                 if (stats.isDirectory()) {
-                    let fileNames = fs.readdirSync(imagePath);
+                    let fileNames = fs.readdirSync(imagePath)
                     for (let fileName of fileNames) {
                         if (fileName.substr(0, 1) !== '.') {
-                            images.push(path.join(imagePath, fileName));
+                            images.push(path.join(imagePath, fileName))
                         }
                     }
                 } else if (stats.isFile()) {
-                    images.push(imagePath);
+                    images.push(imagePath)
                 }
-                this.doUpload(images, (urls) => {
-                    line.images = urls.join('|');
-                    nextCallback();
-                });
+                this.doUpload(images, (err, urls) => {
+                    if (err) {
+                        line.errors.push({
+                            field: 'images',
+                            message: err
+                        })
+                    }
+                    line.images = urls.join('|')
+                    nextCallback()
+                })
             }
         },
         doUpload: function (images, callback, urls = []) {
             this.getClient((SwappyClient) => {
-                let productsApi = new SwappyClient.ProductsApi();
+                let productsApi = new SwappyClient.ProductsApi()
                 productsApi.uploadPicture(fs.createReadStream(images.pop()), {}, (err, results, response) => {
-                    console.log(results);
-                    urls.push(results[0].url);
+                    if (err) {
+                        return callback(err, urls)
+                    }
+                    urls.push(results[0].url)
                     if (images.length) {
-                        this.doUpload(images, callback, urls);
+                        this.doUpload(images, callback, urls)
                     } else {
-                        callback(urls);
+                        callback(null, urls)
                     }
                 })
-            });
+            })
         },
         sendReadyLines: function (lines, callback, index = 0) {
             if (index >= lines.length) {
-                return callback();
+                return callback()
             }
             let nextCallback = () => {
-                    this.sendReadyLines(lines, callback, index + 1);
+                    this.sendReadyLines(lines, callback, index + 1)
                 },
-                line = lines[index];
+                line = lines[index]
             if (!line.areImagesReady()) {
-                nextCallback();
+                nextCallback()
             }
-            this.doSendLine(line, nextCallback);
+            this.doSendLine(line, nextCallback)
         },
         doSendLine(line, callback) {
             this.getClient((SwappyClient) => {
                 let productsApi = new SwappyClient.ProductsApi(),
-                    product = new swappy.Product.constructFromObject(line.getJson());
+                    product = new swappy.Product.constructFromObject(line.getJson())
 
                 productsApi.createProduct(product, {}, (err, data, response) => {
-                    if(err) {
-                        if(err.status == 422 && err.response.body.message == "Validation Failed") {
+                    if (err) {
+                        if (err.status == 422 && err.response.body.message == "Validation Failed") {
                             line.errors = err.response.body.errors
                             return callback()
                         }
@@ -177,25 +179,23 @@ const app = new Vue({
                     line.selected = false
                     line.id = data.id
                     callback()
-                });
-            });
+                })
+            })
         },
         getClient(callback) {
-            this.authenticate((err, token) => {
-                if (err) {
-                    return console.error(err)
-                }
+            if (!this.access_token) {
+                return this.authenticate(() => {
+                    this.getClient(callback)
+                })
+            }
 
-                swappy.ApiClient.instance.authentications.oauth.accessToken = token
-
-                callback(swappy)
-            })
+            callback(swappy)
         },
         authenticate(callback) {
             if (this.access_token) {
                 return callback(null, this.access_token)
             } else {
-                console.log('No access token');
+                console.log('No access token')
             }
             let authUrl = "https://api.swappy.com/oauth2/authorize?response_type=token&redirect_uri=https%3A%2F%2Fapi.swappy.com%2Foauth2%2Flogin_success&realm=Service&client_id=swapster&scope=addresses+sell+email&state=",
                 state = Math.random()
@@ -213,50 +213,69 @@ const app = new Vue({
 
             win.loadURL(authUrl + state)
             win.webContents.on('did-get-response-details', (event, status, newURL) => {
-                if (String(newURL).match(/^https:\/\/api\.swappy\.com\/oauth2\/login_success/)) {
-                    let parts = url.parse('?' + url.parse(newURL).hash.substr(1), true)
-                    win.close()
-                    if (parts.query.access_token) {
-                        this.access_token = parts.query.access_token
-                        callback(null, this.access_token)
-                    } else {
-                        callback('Error getting access token', null)
+                    if (String(newURL).match(/^https:\/\/api\.swappy\.com\/oauth2\/login_success/)) {
+                        let parts = url.parse('?' + url.parse(newURL).hash.substr(1), true)
+                        win.close()
+                        if (parts.query.access_token) {
+                            this.access_token = parts.query.access_token
+                            swappy.ApiClient.instance.authentications.oauth.accessToken = this.access_token
+                            let oauthApi = new swappy.OauthApi()
+                            oauthApi.getMe({}, (err, res, data) => {
+                                if (err) {
+                                    return console.error(err)
+                                }
+                                this.login = res.login
+                                if (typeof callback === 'function') {
+                                    callback(null, this.access_token)
+                                }
+                            })
+                        } else {
+                            if (typeof callback === 'function') {
+                                callback('Error getting access token', null)
+                            }
+                        }
                     }
                 }
-            })
+            )
 
         },
         selectLine(ev, index, line){
-            if (ev.altKey) return;
+            if (ev.altKey) return
             if (!ev.ctrlKey) {
                 for (let l of this.lines) {
-                    l.selected = false;
+                    l.selected = false
                 }
             }
 
             line.selected = !line.selected
             if (ev.shiftKey && this.lastClickedLine) {
                 for (let i = Math.min(index, this.lastClickedLine); i <= Math.max(index, this.lastClickedLine); i++) {
-                    console.log('Line', i, line.selected);
-                    this.lines[i].selected = line.selected;
+                    console.log('Line', i, line.selected)
+                    this.lines[i].selected = line.selected
                 }
             }
             this.lastClickedLine = index
+        },
+        showLineInfos(index, line) {
+            this.showLine = {
+                index: index,
+                line: line
+            };
         }
     }
 })
 
-let previousJson = '';
+let previousJson = ''
 app.$watch('lines', () => {
-    let json = [];
+    let json = []
     for (let line of app.lines) {
-        json.push(line.getJson());
+        json.push(line.getJson())
     }
-    json = JSON.stringify(json);
+    json = JSON.stringify(json)
     if (json != previousJson) {
         console.log('File Modified')
         ipcRenderer.send('fileModified', true)
-        previousJson = json;
+        previousJson = json
     }
 }, {deep: true})
 

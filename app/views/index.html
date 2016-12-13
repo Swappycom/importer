@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Swappy Importer</title>
+</head>
+<body>
+<div id="app" class="window">
+    <header class="toolbar toolbar-header">
+        <div class="toolbar-actions">
+            <button class="btn btn-default" @click="openDialog">
+                <span class="icon icon-folder"></span>
+            </button>
+            <button class="btn btn-default" @click="authenticate" v-if="!access_token">Authenticate</button>
+            <h1 class="title" v-if="access_token">
+                Connected as <strong>{{ login }}</strong>
+            </h1>
+            <button class="btn btn-default" @click="sendLines">
+                <span class="icon icon-upload"></span>
+            </button>
+        </div>
+    </header>
+    <div class="window-content">
+        <div class="no-content" v-if="lines.length == 0">
+            <button @click="openDialog" class="btn btn-xlarge btn-default">Choisir un fichier</button>
+        </div>
+        <table class="table-striped" v-if="lines.length > 0">
+            <thead>
+            <tr>
+                <th style="width: 1%">#</th>
+                <th style="width: 1%">Status</th>
+                <th v-for="header in headers">{{ header }}</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-for="line, index in lines"
+                @dblclick="showLineInfos(index, line)"
+                @mousedown="selectLine($event, index, line)"
+                v-bind:class="line.getCssClasses()">
+                <td>{{ index + 1 }}</td>
+                <td>{{ line.getStatusText() }}</td>
+                <td v-for="header in headers">
+                    {{ line[header] }}
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="overlay" v-if="showLine.line">
+        <div class="popup">
+            <header class="toolbar toolbar-header">
+                <div style="height: 1px"></div>
+                <div class="toolbar-actions">
+                    <span>&nbsp;</span>
+                    <h1 class="title">
+                        Details on line #{{ showLine.index }}
+                    </h1>
+                    <button class="btn btn-default" @click="showLine.line = false">
+                        <span class="icon icon-cancel"></span>
+                    </button>
+                </div>
+            </header>
+            <div class="window-content">
+                <table class="table-striped table-no-select">
+                    <tbody>
+                    <tr v-for="header in headers">
+                        <th>{{ header }}</th>
+                        <td class="has-input">
+                            <input type="text" v-model="showLine.line[header]" v-if="showLine.line.getInputType(header) == 'text'">
+                            <input type="number" v-model="showLine.line[header]" v-if="showLine.line.getInputType(header) == 'number'">
+                            <input type="checkbox" v-model="showLine.line[header]" v-if="showLine.line.getInputType(header) == 'checkbox'">
+                            <textarea type="checkbox" v-model="showLine.line[header]" v-if="showLine.line.getInputType(header) == 'textarea'"></textarea>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<link rel="stylesheet" href="../photon-dist/css/photon.min.css">
+<link rel="stylesheet" href="../app.css">
+<script src="../../node_modules/vue/dist/vue.js"></script>
+<script src="../index.js"></script>
+</body>
+</html>
