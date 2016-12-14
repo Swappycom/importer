@@ -96,8 +96,8 @@
             <div class="window-content">
                 <table class="table-striped table-no-select">
                     <tbody>
-                    <tr v-for="message in uploadMessages">
-                        <td>{{ message }}</td>
+                    <tr v-for="message in uploadMessages" v-bind:class="{ error: message.error }">
+                        <td>{{ message.message }}</td>
                     </tr>
                     </tbody>
                 </table>
