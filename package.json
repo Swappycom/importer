@@ -2,20 +2,44 @@
   "name": "swappy-importer",
   "version": "0.1.0",
   "main": "main.js",
+  "copyright": "Copyright © 2017 Swappy.com",
   "description": "Swappy.com API clients, allows you to import products via CSV",
+  "productName": "SwappyImporter",
+  "homepage": "http://www.swappy.com/",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "pack": "build --dir",
+    "dist": "build"
   },
-  "author": "Swappy.com",
+  "author": {
+    "name": "Hugo Vacher",
+    "email": "info@swappy.com",
+    "url": "http://www.swappy.com/"
+  },
   "license": "MIT",
+  "build": {
+    "appId": "Swappy.Importer.0.1.0",
+    "win": {
+      "inconUrl": "http://www.swappy.com/static/img/logo@2x.png"
+    },
+    "linux": {
+      "category": "Office",
+      "target": [
+        "deb",
+        "tar.gz"
+      ],
+      "synopsis": "Simple tool to upload a CSV of products to Swappy.com"
+    }
+  },
   "devDependencies": {
-    "electron": "^1.4.1"
+    "electron": "^1.4.1",
+    "electron-builder": "^10.8.0"
   },
   "dependencies": {
     "electron-settings": "^2.2.2",
     "fast-csv": "^2.3.0",
     "jquery": "^3.1.1",
-    "swappy-client": "file:../nodejs-client",
+    "swappy-client": "^0.1.1",
     "vue": "^2.1.4"
   }
 }
