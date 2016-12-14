@@ -81,6 +81,41 @@
             </div>
         </div>
     </div>
+    <div class="overlay" v-if="uploading">
+        <div class="popup">
+            <header class="toolbar toolbar-header">
+                <div style="height: 1px"></div>
+                <div class="toolbar-actions">
+                    <span>&nbsp;</span>
+                    <h1 class="title">
+                        Sending {{ uploading }} lines...
+                    </h1>
+                    <span>&nbsp;</span>
+                </div>
+            </header>
+            <div class="window-content">
+                <table class="table-striped table-no-select">
+                    <tbody>
+                    <tr v-for="message in uploadMessages">
+                        <td>{{ message }}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <footer class="toolbar toolbar-footer">
+                <div class="toolbar-actions">
+                    <button class="btn btn-default" :disabled="uploadDone" @click="cancelUpload">
+                        Cancel
+                    </button>
+
+                    <button class="btn btn-primary pull-right" :disabled="!uploadDone" @click="uploading = false">
+                        Close
+                    </button>
+                </div>
+            </footer>
+        </div>
+    </div>
 </div>
 <link rel="stylesheet" href="../photon-dist/css/photon.min.css">
 <link rel="stylesheet" href="../app.css">

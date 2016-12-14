@@ -8,6 +8,9 @@ class Line {
             if (this.getInputType(head) == 'number') {
                 this[head] = this[head].replace(/[^0-9.]/g, '');
             }
+            if (this.getInputType(head) == 'checkbox') {
+                this[head] = this[head] === 'false' ? false : !!this[head];
+            }
         }
         this.selected = false
         this.errors = [];
@@ -81,7 +84,7 @@ class Line {
             return true
         }
         for (let image of images) {
-            if (!image.match(/^https?:\/\//)) {
+            if (!image.url.match(/^https?:\/\//)) {
                 return false
             }
         }
@@ -115,7 +118,7 @@ class Line {
                 if (id == 4 && this.paypal_email) {
                     json.payment.push({
                         'id': id,
-                        'user_data': this.paypal_email
+                        'user_info': this.paypal_email
                     })
                 } else {
                     json.payment.push({
@@ -188,7 +191,13 @@ class Line {
 
         //Images
         if (this.images) {
-            json.images = this.images.split('|')
+            let urls = this.images.split('|');
+            json.images = []
+            for (let url of urls) {
+                json.images.push({
+                    url: url
+                })
+            }
         }
 
         let ignoreHeaders = [
@@ -208,10 +217,11 @@ class Line {
             'refuse_offers_under',
             'charge_taxes',
             'charge_taxes_shipping',
+            'paypal_email',
         ]
 
         for (let header of Line.getHeaders()) {
-            if (this[header] && ignoreHeaders.indexOf(header) === -1) {
+            if (this[header] !== '' && ignoreHeaders.indexOf(header) === -1) {
                 json[header] = this[header]
             }
         }

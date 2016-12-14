@@ -16,6 +16,10 @@ const app = new Vue({
         login: null,
         filePath: null,
         lines: [],
+        uploading: false,
+        uploadMessages: [],
+        uploadDone: false,
+        uploadCanceled: false,
         showLine: {
             index: null,
             line: null
@@ -29,6 +33,17 @@ const app = new Vue({
         }
     },
     methods: {
+        cancelUpload() {
+            this.uploadCanceled = true
+            this.uploadDone = true
+        },
+        addUploadMessage(message) {
+            if (!this.uploading) {
+                this.uploadMessages = []
+                this.uploadDone = false
+            }
+            this.uploadMessages.unshift(message)
+        },
         pushLine(data) {
             let line = new Line(data)
             this.lines.push(line)
@@ -83,18 +98,31 @@ const app = new Vue({
             if (!this.lines.length) {
                 return alert('Please select a CSV file first!')
             }
+            if (!this.access_token) {
+                return this.authenticate((error) => {
+                    if (error) {
+                        this.uploading = false
+                        return
+                    }
+                    this.sendLines()
+                })
+            }
             let lines = this.selectedLines
             if (!lines.length) {
                 lines = this.lines
             }
-            console.log('Uploading', lines.length, 'lines')
+            this.uploading = lines.length
+            this.addUploadMessage('Uploading ' + lines.length + ' lines...')
             this.uploadImages(lines, () => {
+                this.addUploadMessage('All images ready, sending lines...')
                 this.sendReadyLines(lines, () => {
-
+                    this.addUploadMessage('Done!')
+                    this.uploadDone = true
                 })
             })
         },
         uploadImages(lines, callback, index = 0) {
+            if(this.uploadCanceled) return;
             if (index >= lines.length) {
                 return callback()
             }
@@ -107,44 +135,50 @@ const app = new Vue({
             }
             this.selectLine({}, index, line)
 
-            let images = []
+            let imagesPath = []
 
             for (let image of line.getJson().images) {
-                let imagePath = path.join(path.dirname(this.filePath), image),
+                let imagePath = path.join(path.dirname(this.filePath), image.url),
                     stats = fs.lstatSync(imagePath)
                 if (stats.isDirectory()) {
                     let fileNames = fs.readdirSync(imagePath)
                     for (let fileName of fileNames) {
                         if (fileName.substr(0, 1) !== '.') {
-                            images.push(path.join(imagePath, fileName))
+                            imagesPath.push(path.join(imagePath, fileName))
                         }
                     }
                 } else if (stats.isFile()) {
-                    images.push(imagePath)
+                    imagesPath.push(imagePath)
                 }
-                this.doUpload(images, (err, urls) => {
-                    if (err) {
-                        line.errors.push({
-                            field: 'images',
-                            code: 'invalid',
-                            message: err
-                        })
-                    }
-                    line.images = urls.join('|')
-                    nextCallback()
-                })
             }
+            this.addUploadMessage('Uploading ' + imagesPath.length + ' for ' + line.title)
+            this.doUpload(imagesPath, (err, urls) => {
+                if (err) {
+                    line.errors.push({
+                        field: 'images',
+                        code: 'invalid',
+                        message: err
+                    })
+                }
+                line.images = urls.join('|')
+                nextCallback()
+            })
         },
-        doUpload: function (images, callback, urls = []) {
-            this.getClient((SwappyClient) => {
+        doUpload: function (imagesPath, callback, urls = []) {
+            if(this.uploadCanceled) return;
+            this.getClient((error, SwappyClient) => {
+                if (error) {
+                    this.uploading = false
+                    return
+                }
                 let productsApi = new SwappyClient.ProductsApi()
-                productsApi.uploadPicture(fs.createReadStream(images.pop()), {}, (err, results, response) => {
+                productsApi.uploadPicture(fs.createReadStream(imagesPath.pop()), {}, (err, results, response) => {
                     if (err) {
                         return callback(err, urls)
                     }
                     urls.push(results[0].url)
-                    if (images.length) {
-                        this.doUpload(images, callback, urls)
+                    if (imagesPath.length) {
+                        this.doUpload(imagesPath, callback, urls)
                     } else {
                         callback(null, urls)
                     }
@@ -152,6 +186,7 @@ const app = new Vue({
             })
         },
         sendReadyLines: function (lines, callback, index = 0) {
+            if(this.uploadCanceled) return;
             if (index >= lines.length) {
                 return callback()
             }
@@ -165,33 +200,47 @@ const app = new Vue({
             this.doSendLine(line, nextCallback)
         },
         doSendLine(line, callback) {
-            this.getClient((SwappyClient) => {
+            if(this.uploadCanceled) return;
+            this.getClient((error, SwappyClient) => {
+                if (error) {
+                    this.uploading = false
+                    return
+                }
                 let productsApi = new SwappyClient.ProductsApi(),
                     product = new swappy.Product.constructFromObject(line.getJson())
 
+                this.addUploadMessage('Importing product ' + line.title)
                 productsApi.createProduct(product, {}, (err, data, response) => {
                     if (err) {
                         if (err.status == 422 && err.response.body.message == "Validation Failed") {
                             line.errors = err.response.body.errors
-                            console.log('errors', err.response.body.errors);
+                            console.log('errors', err.response.body.errors)
+                            this.addUploadMessage('Validation error importing product ' + line.title)
                             return callback()
+                        } else {
+                            this.addUploadMessage('Unexpected error uploading product ' + line.title + ': ' + err.response.body.message)
                         }
                         return console.error(err)
                     }
                     line.selected = false
                     line.id = data.id
+                    this.addUploadMessage('Product imported, saving ID: ' + line.id)
                     callback()
                 })
             })
         },
         getClient(callback) {
             if (!this.access_token) {
-                return this.authenticate(() => {
-                    this.getClient(callback)
+                return this.authenticate((error) => {
+                    if (error) {
+                        callback(error)
+                    } else {
+                        this.getClient(callback)
+                    }
                 })
             }
 
-            callback(swappy)
+            callback(null, swappy)
         },
         authenticate(callback) {
             if (this.access_token) {
@@ -212,11 +261,12 @@ const app = new Vue({
                     nodeIntegration: false
                 }
             })
-
+            let done = false
             win.loadURL(authUrl + state)
             win.webContents.on('did-get-response-details', (event, status, newURL) => {
                     if (String(newURL).match(/^https:\/\/api\.swappy\.com\/oauth2\/login_success/)) {
                         let parts = url.parse('?' + url.parse(newURL).hash.substr(1), true)
+                        done = true
                         win.close()
                         if (parts.query.access_token) {
                             this.access_token = parts.query.access_token
@@ -239,6 +289,12 @@ const app = new Vue({
                     }
                 }
             )
+            win.on('closed', () => {
+                if (!done) {
+                    callback('Canceled by user')
+                }
+                win = null
+            })
 
         },
         selectLine(ev, index, line){
@@ -259,10 +315,11 @@ const app = new Vue({
             this.lastClickedLine = index
         },
         showLineInfos(index, line) {
+            console.log(line.getJson())
             this.showLine = {
                 index: index,
                 line: line
-            };
+            }
         }
     }
 })

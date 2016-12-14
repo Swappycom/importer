@@ -12,6 +12,8 @@ ipcMain.on('fileModified', (ev, isModified) => {
 function createWindow() {
     // Create the browser window.
     win = new BrowserWindow({
+        minWidth: 475,
+        minHeight: 300,
         width: 800,
         height: 600,
     });
