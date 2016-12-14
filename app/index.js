@@ -79,7 +79,11 @@ const app = new Vue({
             this.lines = []
             csv
                 .fromPath(filePath, {
-                    headers: true
+                    headers: true,
+                    delimiter: ',',
+                    quote: '"',
+                    escape: '"',
+                    trim: true,
                 })
                 .on("data", (data) => {
                     this.pushLine(data)
@@ -90,7 +94,12 @@ const app = new Vue({
                 })
         },
         saveFile() {
-            let csvStream = csv.createWriteStream({headers: true}),
+            let csvStream = csv.createWriteStream({
+                    headers: true,
+                    delimiter: ',',
+                    quote: '"',
+                    escape: '"',
+                }),
                 writableStream = fs.createWriteStream(this.filePath)
 
             writableStream.on("finish", function () {
@@ -254,6 +263,7 @@ const app = new Vue({
                         } else {
                             console.error(err)
                             this.addUploadError('Unexpected error: ' + (err.response ? err.response.body.message : err))
+                            this.uploadDone = true
                             return console.error(err)
                         }
                     }
@@ -338,6 +348,7 @@ const app = new Vue({
         setToken(token, callback) {
             this.access_token = token
             swappy.ApiClient.instance.authentications.oauth.accessToken = token
+            swappy.ApiClient.instance.timeout = 10000;
             settings.set('account', {
                 token: token,
             })
