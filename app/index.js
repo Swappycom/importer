@@ -41,7 +41,7 @@ const app = new Vue({
     },
     methods: {
         cancelUpload() {
-            console.error('Cancel upload');
+            console.error('Cancel upload')
             this.uploadCanceled = true
             this.uploadDone = true
         },
@@ -120,8 +120,8 @@ const app = new Vue({
             if (!this.access_token) {
                 return this.authenticate((error) => {
                     if (error) {
-                        this.addUploadMessage('Auth error: ' + error, true);
-                        console.error('Authenticate error', error);
+                        this.addUploadMessage('Auth error: ' + error, true)
+                        console.error('Authenticate error', error)
                         this.uploading = false
                         return
                     }
@@ -135,10 +135,10 @@ const app = new Vue({
 
             //Reset errors
             for (let line of lines) {
-                line.errors = [];
+                line.errors = []
             }
 
-            this.uploadMessages = [];
+            this.uploadMessages = []
             this.uploading = lines.length
             this.addUploadMessage('Uploading ' + lines.length + ' lines...')
             this.uploadImages(lines, () => {
@@ -150,7 +150,7 @@ const app = new Vue({
             })
         },
         uploadImages(lines, callback, index = 0) {
-            if (this.uploadCanceled) return;
+            if (this.uploadCanceled) return
             if (index >= lines.length) {
                 return callback()
             }
@@ -186,8 +186,8 @@ const app = new Vue({
                         code: 'invalid',
                         message: err
                     })
-                    this.addUploadError('File/Directory not found ' + err);
-                    return nextCallback();
+                    this.addUploadError('File/Directory not found ' + err)
+                    return nextCallback()
                 }
             }
             this.addUploadMessage('Uploading ' + imagesPath.length + ' images for ' + line.title)
@@ -204,10 +204,10 @@ const app = new Vue({
             })
         },
         doUpload: function (imagesPath, callback, urls = []) {
-            if (this.uploadCanceled) return;
+            if (this.uploadCanceled) return
             this.getClient((error, SwappyClient) => {
                 if (error) {
-                    this.addUploadMessage('Error: ' + error, true);
+                    this.addUploadMessage('Error: ' + error, true)
                     this.uploading = false
                     return
                 }
@@ -226,7 +226,7 @@ const app = new Vue({
             })
         },
         sendReadyLines: function (lines, callback, index = 0) {
-            if (this.uploadCanceled) return;
+            if (this.uploadCanceled) return
             if (index >= lines.length) {
                 return callback()
             }
@@ -240,10 +240,10 @@ const app = new Vue({
             this.doSendLine(line, nextCallback)
         },
         doSendLine(line, callback) {
-            if (this.uploadCanceled) return;
+            if (this.uploadCanceled) return
             this.getClient((error, SwappyClient) => {
                 if (error) {
-                    this.addUploadMessage('Error: ' + error, true);
+                    this.addUploadMessage('Error: ' + error, true)
                     this.uploading = false
                     return
                 }
@@ -274,7 +274,9 @@ const app = new Vue({
                     } else {
                         this.addUploadMessage('Product imported #' + line.id)
                     }
-                    callback()
+                    setTimeout(() => {
+                        callback()
+                    }, 500)
                 }
 
                 if (updating) {
@@ -348,7 +350,7 @@ const app = new Vue({
         setToken(token, callback) {
             this.access_token = token
             swappy.ApiClient.instance.authentications.oauth.accessToken = token
-            swappy.ApiClient.instance.timeout = 10000;
+            swappy.ApiClient.instance.timeout = 10000
             settings.set('account', {
                 token: token,
             })
