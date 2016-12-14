@@ -8,6 +8,7 @@
   "homepage": "http://www.swappy.com/",
   "scripts": {
     "start": "electron .",
+    "dev": "NODE_ENV='development' npm run start",
     "pack": "build --dir",
     "dist": "build"
   },

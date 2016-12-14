@@ -29,10 +29,12 @@ function createWindow() {
         slashes: true
     }))
 
-    // Open the DevTools.
-    win.webContents.openDevTools({
-        mode: 'detach'
-    })
+    if(process.env.NODE_ENV == 'development') {
+        // Open the DevTools.
+        win.webContents.openDevTools({
+            mode: 'detach'
+        })
+    }
 
     win.webContents.once('dom-ready', function () {
         console.log('Ready to show')
