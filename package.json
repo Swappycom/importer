@@ -32,8 +32,8 @@
     }
   },
   "devDependencies": {
-    "electron": "^1.4.1",
-    "electron-builder": "^10.8.0"
+    "electron-builder": "^10.8.0",
+    "electron-prebuilt": "^1.4.1"
   },
   "dependencies": {
     "electron-settings": "^2.2.2",

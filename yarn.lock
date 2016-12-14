@@ -199,6 +199,10 @@ buffer-crc32@^0.2.1:
   version "0.2.13"
   resolved "https://registry.yarnpkg.com/buffer-crc32/-/buffer-crc32-0.2.13.tgz#0d333e3f00eac50aa1454abd30ef8c2a5d9a7242"
 
+buffer-shims@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/buffer-shims/-/buffer-shims-1.0.0.tgz#9978ce317388c649ad8793028c3477ef044a8b51"
+
 builtin-modules@^1.0.0:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/builtin-modules/-/builtin-modules-1.1.1.tgz#270f076c5a72c02f5b65a47df94c5fe3a278892f"
@@ -345,7 +349,7 @@ core-util-is@~1.0.0:
 
 crc32-stream@^1.0.0:
   version "1.0.0"
-  resolved "https://registry.yarnpkg.com/crc32-stream/-/crc32-stream-1.0.0.tgz#ea155e5e1d738ed3778438ffe92ffe2a141aeb3f"
+  resolved "http://registry.npmjs.org/crc32-stream/-/crc32-stream-1.0.0.tgz#ea155e5e1d738ed3778438ffe92ffe2a141aeb3f"
   dependencies:
     buffer-crc32 "^0.2.1"
     readable-stream "^2.0.0"
@@ -380,7 +384,7 @@ dashdash@^1.12.0:
 
 date-extended@~0.0.3:
   version "0.0.6"
-  resolved "http://registry.npmjs.org/date-extended/-/date-extended-0.0.6.tgz#23802d57dd1bf7818813fe0c32e851a86da267c9"
+  resolved "https://registry.yarnpkg.com/date-extended/-/date-extended-0.0.6.tgz#23802d57dd1bf7818813fe0c32e851a86da267c9"
   dependencies:
     array-extended "~0.0.3"
     extended "~0.0.3"
@@ -391,8 +395,8 @@ debug@0.7.4:
   resolved "https://registry.yarnpkg.com/debug/-/debug-0.7.4.tgz#06e1ea8082c2cb14e39806e22e2f6f757f92af39"
 
 debug@2, debug@^2.1.3, debug@^2.2.0, debug@^2.3.2:
-  version "2.4.2"
-  resolved "https://registry.yarnpkg.com/debug/-/debug-2.4.2.tgz#a255d4489f58a2d7b6aaaddb9b7c60828f6ba27a"
+  version "2.4.3"
+  resolved "https://registry.yarnpkg.com/debug/-/debug-2.4.3.tgz#3fe67c5588e724d0f5d9e48c8f08ff69b4b20643"
   dependencies:
     ms "0.7.2"
 
@@ -536,6 +540,13 @@ electron-macos-sign@^1.3.4:
     minimist "^1.2.0"
     plist "^2.0.1"
 
+electron-prebuilt@^1.4.1:
+  version "1.4.12"
+  resolved "https://registry.yarnpkg.com/electron-prebuilt/-/electron-prebuilt-1.4.12.tgz#812905111c2a5a9a895d797c2eded2003d95c79c"
+  dependencies:
+    electron-download "^3.0.1"
+    extract-zip "^1.0.3"
+
 electron-settings@^2.2.2:
   version "2.2.2"
   resolved "https://registry.yarnpkg.com/electron-settings/-/electron-settings-2.2.2.tgz#5e56f17f6d908987028e6d6ed21f86d98d20a1ff"
@@ -547,13 +558,6 @@ electron-settings@^2.2.2:
     file-exists "^2.0.0"
     fs-extra "^0.30.0"
     key-path-helpers "^0.4.0"
-
-electron@^1.4.1:
-  version "1.4.12"
-  resolved "https://registry.yarnpkg.com/electron/-/electron-1.4.12.tgz#ae6641aa1db01dd04e41c56639ca7b84b888767a"
-  dependencies:
-    electron-download "^3.0.1"
-    extract-zip "^1.0.3"
 
 end-of-stream@^1.0.0:
   version "1.1.0"
@@ -1430,10 +1434,11 @@ readable-stream@1.0.27-1:
     isarray "0.0.1"
     string_decoder "~0.10.x"
 
-readable-stream@^2.0.0, readable-stream@^2.0.2, readable-stream@^2.0.5, readable-stream@~2.0.0, readable-stream@~2.0.5:
-  version "2.0.6"
-  resolved "https://registry.yarnpkg.com/readable-stream/-/readable-stream-2.0.6.tgz#8f90341e68a53ccc928788dacfcd11b36eb9b78e"
+readable-stream@^2.0.0, readable-stream@^2.0.2, readable-stream@^2.0.5:
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/readable-stream/-/readable-stream-2.2.2.tgz#a9e6fec3c7dda85f8bb1b3ba7028604556fc825e"
   dependencies:
+    buffer-shims "^1.0.0"
     core-util-is "~1.0.0"
     inherits "~2.0.1"
     isarray "~1.0.0"
@@ -1449,6 +1454,17 @@ readable-stream@~1.1.9:
     inherits "~2.0.1"
     isarray "0.0.1"
     string_decoder "~0.10.x"
+
+readable-stream@~2.0.0, readable-stream@~2.0.5:
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/readable-stream/-/readable-stream-2.0.6.tgz#8f90341e68a53ccc928788dacfcd11b36eb9b78e"
+  dependencies:
+    core-util-is "~1.0.0"
+    inherits "~2.0.1"
+    isarray "~1.0.0"
+    process-nextick-args "~1.0.6"
+    string_decoder "~0.10.x"
+    util-deprecate "~1.0.1"
 
 readdir-scoped-modules@^1.0.0:
   version "1.0.2"
@@ -1703,8 +1719,9 @@ supports-color@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-2.0.0.tgz#535d045ce6b6363fa40117084629995e9df324c7"
 
-"swappy-client@file:../nodejs-client":
+swappy-client@^0.1.1:
   version "0.1.1"
+  resolved "https://registry.yarnpkg.com/swappy-client/-/swappy-client-0.1.1.tgz#bbb17d4d647f0ac317a1d7593b3bfcc782123679"
   dependencies:
     superagent "1.7.1"
 
