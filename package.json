@@ -18,9 +18,9 @@
   },
   "license": "MIT",
   "build": {
-    "appId": "Swappy.Importer.0.1.0",
+    "appId": "com.swappy.importer",
     "win": {
-      "inconUrl": "http://www.swappy.com/static/img/logo@2x.png"
+      "iconUrl": "https://s3.amazonaws.com/swappy.docker/ressources/icon.ico"
     },
     "linux": {
       "category": "Office",
