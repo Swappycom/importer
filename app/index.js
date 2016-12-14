@@ -41,6 +41,7 @@ const app = new Vue({
     },
     methods: {
         cancelUpload() {
+            console.error('Cancel upload');
             this.uploadCanceled = true
             this.uploadDone = true
         },
@@ -110,6 +111,8 @@ const app = new Vue({
             if (!this.access_token) {
                 return this.authenticate((error) => {
                     if (error) {
+                        this.addUploadMessage('Auth error: ' + error, true);
+                        console.error('Authenticate error', error);
                         this.uploading = false
                         return
                     }
@@ -195,6 +198,7 @@ const app = new Vue({
             if (this.uploadCanceled) return;
             this.getClient((error, SwappyClient) => {
                 if (error) {
+                    this.addUploadMessage('Error: ' + error, true);
                     this.uploading = false
                     return
                 }
@@ -230,14 +234,17 @@ const app = new Vue({
             if (this.uploadCanceled) return;
             this.getClient((error, SwappyClient) => {
                 if (error) {
+                    this.addUploadMessage('Error: ' + error, true);
                     this.uploading = false
                     return
                 }
                 let productsApi = new SwappyClient.ProductsApi(),
-                    product = new swappy.Product.constructFromObject(line.getJson())
+                    product = new swappy.Product.constructFromObject(line.getJson()),
+                    updating = !!line.id
 
                 this.addUploadMessage('Importing product ' + line.title)
-                productsApi.createProduct(product, {}, (err, data, response) => {
+
+                let responseCallback = (err, data, response) => {
                     if (err) {
                         if (err.status == 422 && err.response.body.message == "Validation Failed") {
                             line.errors = err.response.body.errors
@@ -245,15 +252,26 @@ const app = new Vue({
                             this.addUploadError('Validation error importing product ' + line.title)
                             return callback()
                         } else {
-                            this.addUploadError('Unexpected error uploading product ' + line.title + ': ' + err.response.body.message)
+                            console.error(err)
+                            this.addUploadError('Unexpected error: ' + (err.response ? err.response.body.message : err))
+                            return console.error(err)
                         }
-                        return console.error(err)
                     }
                     line.selected = false
-                    line.id = data.id
-                    this.addUploadMessage('Product imported, saving ID: ' + line.id)
+                    line.id = Number.parseInt(data.id)
+                    if (updating) {
+                        this.addUploadMessage('Product #' + line.id + ' updated!')
+                    } else {
+                        this.addUploadMessage('Product imported #' + line.id)
+                    }
                     callback()
-                })
+                }
+
+                if (updating) {
+                    productsApi.updateProduct(line.id, product, responseCallback)
+                } else {
+                    productsApi.createProduct(product, {}, responseCallback)
+                }
             })
         },
         getClient(callback) {

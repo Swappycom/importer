@@ -201,6 +201,7 @@ class Line {
         }
 
         let ignoreHeaders = [
+            'id',
             'images',
             'price',
             'reserve_price',
