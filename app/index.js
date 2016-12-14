@@ -342,15 +342,29 @@ const app = new Vue({
                 token: token,
             })
             let oauthApi = new swappy.OauthApi()
-            oauthApi.getMe({}, (err, res, data) => {
+            oauthApi.getMe({}, (err, res, response) => {
                 if (err) {
-                    console.error(err);
-                    callback(err, null)
+                    this.resetToken()
+                    if (callback && response && response.body && response.body.message == "The access token provided has expired") {
+                        return this.authenticate(callback)
+                    }
+                    console.error(err, res, response)
+                    if (callback) {
+                        callback(err, null)
+                    }
+                    return
                 }
                 this.login = res.login
                 if (typeof callback === 'function') {
                     callback(null, token)
                 }
+            })
+        },
+        resetToken() {
+            this.access_token = null
+            swappy.ApiClient.instance.authentications.oauth.accessToken = null
+            settings.set('account', {
+                token: null,
             })
         },
         selectLine(ev, index, line){
