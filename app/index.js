@@ -407,6 +407,25 @@ const app = new Vue({
                 index: index,
                 line: line
             }
+        },
+        deleteSelectedLines() {
+            let message;
+            switch(this.selectedLines.length) {
+                case 0:
+                    return;
+                case 1:
+                    message = 'Do you really want to delete this line?';
+                    break;
+                default:
+                    message = 'Do you really want to delete this ' + this.selectedLines.length + ' lines?';
+                    break;
+            }
+            if(confirm(message)) {
+                for(let line of this.selectedLines) {
+                    let index = this.lines.indexOf(line);
+                    this.lines.splice(index, 1);
+                }
+            }
         }
     }
 })
@@ -432,3 +451,9 @@ ipcRenderer.on('saveFile', () => {
 ipcRenderer.on('openFile', (ev, file) => {
     app.openFile(file)
 })
+
+window.addEventListener('keypress', function (ev) {
+    if (ev.key == 'Delete' && !ev.shiftKey && !ev.altKey && !ev.ctrlKey) {
+        app.deleteSelectedLines();
+    }
+});
