@@ -7,7 +7,7 @@ cache:
 artifacts:
   path: dist/*.exe
 deploy:
-  release: swappy-lister-$(appveyor_repo_tag_name)
+  release: $(appveyor_repo_tag_name)
   description: 'Tag Release'
   provider: GitHub
   auth_token:
