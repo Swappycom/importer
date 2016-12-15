@@ -61,7 +61,9 @@ function createWindow() {
                     e.preventDefault()
                     win.webContents.send('saveFile')
                     ipcMain.on('fileModified', () => {
-                        win.close()
+                        if(win) {
+                            win.close()
+                        }
                     })
             }
         }
