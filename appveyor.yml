@@ -1,0 +1,18 @@
+version: '{build}'
+build_script:
+  cmd: >-
+    npm install
+    npm run dist
+artifacts:
+  path: dist/*.exe
+deploy:
+  release: swappy-lister-$(appveyor_repo_tag_name)
+  description: 'Tag Release'
+  provider: GitHub
+  auth_token:
+    secure: +b0SUw4PG82cNJaAm4jc6zRM9wan1/nf0csL1lwiNH6CVrIZ2czM061Apfo8Fy3/
+  artifact: /dist\/.*\.exe/
+  draft: false
+  prerelease: false
+  on:
+    appveyor_repo_tag: true        # deploy on tag push only
