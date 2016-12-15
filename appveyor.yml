@@ -1,8 +1,7 @@
 version: '{build}'
 build_script:
-  cmd: >-
-    npm install
-    npm run dist
+  - npm install
+  - npm run dist
 artifacts:
   path: dist/*.exe
 deploy:
