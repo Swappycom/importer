@@ -12,7 +12,7 @@
                 <span class="icon icon-folder"></span>
             </button>
             <button class="btn btn-default" @click="authenticate" v-if="!access_token">Authenticate</button>
-            <h1 class="title" v-if="access_token">
+            <h1 class="title" v-if="access_token" @click="resetToken(); authenticate()">
                 Connected as <strong>{{ login }}</strong>
             </h1>
             <button class="btn btn-default" @click="sendLines">

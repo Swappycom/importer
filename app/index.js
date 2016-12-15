@@ -14,6 +14,8 @@ settings.get('account.token').then(val => {
     }
 })
 
+let partitionInc = 1;
+
 const app = new Vue({
     el: '#app',
     data: {
@@ -315,7 +317,8 @@ const app = new Vue({
                 width: 520,
                 height: 420,
                 webPreferences: {
-                    nodeIntegration: false
+                    nodeIntegration: false,
+                    partition: 'part' + partitionInc++
                 }
             })
             let done = false
@@ -375,6 +378,7 @@ const app = new Vue({
         },
         resetToken() {
             this.access_token = null
+            this.login = null;
             swappy.ApiClient.instance.authentications.oauth.accessToken = null
             settings.set('account', {
                 token: null,
