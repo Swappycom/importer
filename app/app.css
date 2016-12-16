@@ -94,6 +94,7 @@ td.has-input {
     font-size: 0;
 }
 td.has-input textarea {
+    height: 220px;
     min-height: 75px;
     width: 100%;
     max-width: 100%;
