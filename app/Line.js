@@ -11,6 +11,11 @@ class Line {
             if (this.getInputType(head) == 'checkbox') {
                 this[head] = this[head] === 'false' ? false : !!this[head];
             }
+            if (this.getInputType(head) == 'textarea') {
+                if (!this[head].match(/<[^>]+><\/[^>]+>/)) {
+                    this[head] = this[head].replace(/\n/g, '<br>');
+                }
+            }
         }
         this.selected = false
         this.errors = [];

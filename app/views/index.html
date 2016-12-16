@@ -73,7 +73,7 @@
                             <input type="text" v-model="showLine.line[header]" v-if="showLine.line.getInputType(header) == 'text'">
                             <input type="number" v-model="showLine.line[header]" v-if="showLine.line.getInputType(header) == 'number'">
                             <input type="checkbox" v-model="showLine.line[header]" v-if="showLine.line.getInputType(header) == 'checkbox'">
-                            <textarea type="checkbox" v-model="showLine.line[header]" v-if="showLine.line.getInputType(header) == 'textarea'"></textarea>
+                            <textarea id="description" v-model="showLine.line[header]" v-if="showLine.line.getInputType(header) == 'textarea'"></textarea>
                         </td>
                     </tr>
                     </tbody>
@@ -117,6 +117,7 @@
         </div>
     </div>
 </div>
+<script src="../ckeditor/full/ckeditor.js"></script>
 <link rel="stylesheet" href="../photon-dist/css/photon.min.css">
 <link rel="stylesheet" href="../app.css">
 <script src="../../node_modules/vue/dist/vue.js"></script>

@@ -410,7 +410,7 @@ const app = new Vue({
         },
         deleteSelectedLines() {
             let message;
-            switch(this.selectedLines.length) {
+            switch (this.selectedLines.length) {
                 case 0:
                     return;
                 case 1:
@@ -420,8 +420,8 @@ const app = new Vue({
                     message = 'Do you really want to delete this ' + this.selectedLines.length + ' lines?';
                     break;
             }
-            if(confirm(message)) {
-                for(let line of this.selectedLines) {
+            if (confirm(message)) {
+                for (let line of this.selectedLines) {
                     let index = this.lines.indexOf(line);
                     this.lines.splice(index, 1);
                 }
@@ -429,6 +429,23 @@ const app = new Vue({
         }
     }
 })
+let editor;
+app.$watch('showLine.line', function (newVal) {
+    if (newVal) {
+        this.$nextTick(() => {
+            editor = CKEDITOR.replace('description', {
+                customConfig: '../config.js',
+                contentsCss: ['https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600,400italic,300,700,900', '../ckeditor/content.css'],
+                on: {
+                    change: function () {
+                        this.updateElement()
+                        app.$data.showLine.line.description = this.getData()
+                    }
+                }
+            })
+        })
+    }
+});
 
 let previousJson = ''
 app.$watch('lines', () => {

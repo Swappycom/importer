@@ -8,9 +8,11 @@
     align-items: center;
     justify-content: center;
 }
+
 .toolbar {
     min-height: 35px;
 }
+
 td {
     max-width: 300px;
     overflow-x: hidden;
@@ -73,7 +75,7 @@ td {
 .popup {
     margin: 0 auto;
     min-width: 400px;
-    max-width: 80%;
+    max-width: 90%;
     height: auto;
     max-height: 90%;
     background: white;
@@ -89,20 +91,31 @@ td {
     min-height: 200px;
 }
 
+th {
+    border: none;
+}
+
 td.has-input {
     padding: 0;
     font-size: 0;
 }
+
 td.has-input textarea {
-    height: 220px;
+    height: 350px;
     min-height: 75px;
     width: 100%;
     max-width: 100%;
     min-width: 100%;
 }
+
+textarea.cke_source {
+    background: white !important;
+}
+
 .table-striped tr:nth-child(even) .has-input input, .table-striped tr:nth-child(even) .has-input textarea {
     background: #f5f5f4;
 }
+
 td.has-input input[type="text"], td.has-input input[type="number"], td.has-input textarea {
     padding-left: 5px;
     width: 100%;
@@ -110,6 +123,7 @@ td.has-input input[type="text"], td.has-input input[type="number"], td.has-input
     margin-left: 0;
     border-width: 0;
 }
+
 td.has-input input[type="checkbox"] {
     font-size: 12px;
     width: auto;
@@ -120,4 +134,9 @@ td.has-input input[type="checkbox"] {
 table tbody th {
     white-space: nowrap;
     width: 10%;
+}
+
+/* CKEDITOR */
+.cke_chrome {
+    border: none;
 }
