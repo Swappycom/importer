@@ -229,6 +229,7 @@ class Line {
             'delivery',
             'address',
             'estimate_min',
+            'estimate_max',
             'option_titlecolor',
             'option_first',
             'option_frame',
@@ -238,6 +239,7 @@ class Line {
             'charge_taxes',
             'charge_taxes_shipping',
             'paypal_email',
+            'live',
         ]
 
         for (let header of Line.getHeaders()) {
