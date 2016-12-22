@@ -20,7 +20,7 @@ const app = new Vue({
     el: '#app',
     data: {
         headers: Line.getHeaders(),
-        lastClickedLine: null,
+        lastSelectedLine: null,
         access_token: null,
         login: null,
         filePath: null,
@@ -386,20 +386,22 @@ const app = new Vue({
         },
         selectLine(ev, index, line){
             if (ev.altKey) return
+
+            //Deselect
             if (!ev.ctrlKey) {
                 for (let l of this.lines) {
                     l.selected = false
                 }
             }
 
-            line.selected = !line.selected
-            if (ev.shiftKey && this.lastClickedLine) {
-                for (let i = Math.min(index, this.lastClickedLine); i <= Math.max(index, this.lastClickedLine); i++) {
-                    console.log('Line', i, line.selected)
-                    this.lines[i].selected = line.selected
+            if (ev.shiftKey && this.lastSelectedLine) {
+                for (let i = Math.min(index, this.lastSelectedLine); i <= Math.max(index, this.lastSelectedLine); i++) {
+                    this.lines[i].selected = true;
                 }
+            } else {
+                line.selected = !line.selected
+                this.lastSelectedLine = index;
             }
-            this.lastClickedLine = index
         },
         showLineInfos(index, line) {
             console.log(line.getJson())

@@ -35,7 +35,7 @@
             <tbody>
             <tr v-for="line, index in lines"
                 @dblclick="showLineInfos(index, line)"
-                @mousedown="selectLine($event, index, line)"
+                @click="selectLine($event, index, line)"
                 v-bind:class="line.getCssClasses()">
                 <td>{{ index + 1 }}</td>
                 <td>{{ line.getStatusText() }}</td>
