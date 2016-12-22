@@ -431,6 +431,10 @@ const app = new Vue({
         }
     }
 })
+let title = document.title;
+app.$watch('filePath', function (newVal) {
+    document.title = title + ' - ' + newVal;
+});
 let editor;
 app.$watch('showLine.line', function (newVal) {
     if (newVal) {
@@ -457,11 +461,10 @@ app.$watch('lines', () => {
     }
     json = JSON.stringify(json)
     if (json != previousJson) {
-        console.log('File Modified')
         ipcRenderer.send('fileModified', true)
         previousJson = json
     }
-}, {deep: true})
+}, {deep: true});
 
 ipcRenderer.on('saveFile', () => {
     app.saveFile()
