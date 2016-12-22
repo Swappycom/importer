@@ -314,8 +314,8 @@ const app = new Vue({
                 resizable: false,
                 parent: remote.getCurrentWindow(),
                 modal: true,
-                width: 520,
-                height: 420,
+                width: 800,
+                height: 600,
                 webPreferences: {
                     nodeIntegration: false,
                     partition: 'part' + partitionInc++
