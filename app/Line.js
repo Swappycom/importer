@@ -56,6 +56,7 @@ class Line {
             'option_titlecolor',
             'option_first',
             'option_frame',
+            'live',
             'lot_number',
             'estimate_min',
             'estimate_max'
@@ -69,6 +70,7 @@ class Line {
             case 'reserve_price':
             case 'accept_offers_over':
             case 'refuse_offers_under':
+            case 'live':
             case 'estimate_min':
             case 'estimate_max':
                 return 'number';

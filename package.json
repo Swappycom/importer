@@ -1,6 +1,6 @@
 {
   "name": "swappy-importer",
-  "version": "0.1.6",
+  "version": "0.1.6a",
   "main": "main.js",
   "copyright": "Copyright © 2017 Swappy.com",
   "description": "Swappy.com API clients, allows you to import products via CSV",
