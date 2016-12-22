@@ -56,6 +56,9 @@ class Line {
             'option_titlecolor',
             'option_first',
             'option_frame',
+            'lot_number',
+            'estimate_min',
+            'estimate_max'
         ]
     }
 
@@ -66,6 +69,8 @@ class Line {
             case 'reserve_price':
             case 'accept_offers_over':
             case 'refuse_offers_under':
+            case 'estimate_min':
+            case 'estimate_max':
                 return 'number';
             case 'option_titlecolor':
             case 'option_first':
@@ -149,6 +154,13 @@ class Line {
         if (this.address) {
             json.address = {
                 id: Number.parseInt(this.address)
+            }
+        }
+
+        //Live
+        if (this.live) {
+            json.live = {
+                id: Number.parseInt(this.live)
             }
         }
 
