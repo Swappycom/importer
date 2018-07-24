@@ -172,7 +172,7 @@ const app = new Vue({
                 try {
                     let stats = fs.lstatSync(imagePath)
                     if (stats.isDirectory()) {
-                        let fileNames = fs.readdirSync(imagePath)
+                        let fileNames = fs.readdirSync(imagePath).sort()
                         for (let fileName of fileNames) {
                             if (fileName.substr(0, 1) !== '.') {
                                 imagesPath.push(path.join(imagePath, fileName))
