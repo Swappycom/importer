@@ -11,7 +11,7 @@ deploy:
   description: 'Automated release $(appveyor_repo_tag_name)'
   provider: GitHub
   auth_token:
-    secure: +b0SUw4PG82cNJaAm4jc6zRM9wan1/nf0csL1lwiNH6CVrIZ2czM061Apfo8Fy3/
+    secure: zJZKDKcrd4i1a8WMLt0XIn0MirI3OglJKNG7rWxysFCw1lbsfUJNBUrcVT0vNh8y
   artifact: /dist\/.*\.exe/
   draft: false
   prerelease: false
